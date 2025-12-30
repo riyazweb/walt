@@ -10,7 +10,7 @@ RUN npm run build
 FROM node:20-slim
 WORKDIR /app
 
-# Copy backend dependencies
+# Copy backend dependencies first for better caching
 COPY server/package*.json ./server/
 RUN cd server && npm install --production
 
@@ -27,5 +27,6 @@ ENV NODE_ENV=production
 # Expose the port
 EXPOSE 8080
 
-# Start the server
-CMD ["node", "server/index.js"]
+# Start the server from the server directory
+WORKDIR /app/server
+CMD ["node", "index.js"]

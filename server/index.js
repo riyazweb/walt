@@ -5,6 +5,8 @@ const multer = require('multer');
 const path = require('path');
 require('dotenv').config();
 
+console.log('Starting server initialization...');
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -15,17 +17,26 @@ app.get('/health', (req, res) => {
 });
 
 // Initialize Storage
-// On Cloud Run, it will automatically use the default service account if keyFilename is not provided
+console.log('Initializing Google Cloud Storage...');
 const storageOptions = {};
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS && process.env.NODE_ENV !== 'production') {
   storageOptions.keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   console.log('Using local credentials from:', process.env.GOOGLE_APPLICATION_CREDENTIALS);
 } else {
-  console.log('Using default Google Cloud credentials');
+  console.log('Using default Google Cloud credentials (ADC)');
 }
-const storage = new Storage(storageOptions); 
+
+let storage;
+let bucket;
 const bucketName = 'waltbuck1';
-const bucket = storage.bucket(bucketName);
+
+try {
+  storage = new Storage(storageOptions); 
+  bucket = storage.bucket(bucketName);
+  console.log(`Connected to bucket: ${bucketName}`);
+} catch (err) {
+  console.error('Failed to initialize Storage:', err);
+}
 
 // Multer setup for memory storage
 const upload = multer({
@@ -37,6 +48,7 @@ const upload = multer({
 
 // Serve static files from the React app
 const distPath = path.join(__dirname, '../dist');
+console.log(`Checking for static files at: ${distPath}`);
 app.use(express.static(distPath));
 
 // GET all wallpapers
@@ -118,11 +130,28 @@ app.post('/api/delete', async (req, res) => {
 // The "catchall" handler: for any request that doesn't
 // match one above, send back React's index.html file.
 app.get('*', (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
+  const indexPath = path.join(distPath, 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error('Error sending index.html:', err);
+      res.status(500).send('Frontend build not found. Please ensure the build step completed successfully.');
+    }
+  });
 });
 
 const PORT = process.env.PORT || 8080;
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Serving static files from: ${distPath}`);
+  console.log(`>>> Server is successfully listening on 0.0.0.0:${PORT}`);
+  console.log(`>>> NODE_ENV: ${process.env.NODE_ENV}`);
+}).on('error', (err) => {
+  console.error('Server failed to start:', err);
 });
