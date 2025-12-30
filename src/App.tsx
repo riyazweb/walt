@@ -60,7 +60,7 @@ function App() {
       case 'support':
         return <Support />;
       default:
-        return <Dashboard onUploadClick={() => setIsUploadModalOpen(true)} />;
+        return <Dashboard onUploadClick={() => setIsUploadModalOpen(true)} onNavigate={handleNavigate} />;
     }
   };
 

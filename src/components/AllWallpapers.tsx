@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { db, storage } from '../firebase';
+import { db } from '../firebase';
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
-import { ref, deleteObject } from 'firebase/storage';
 
 interface Wallpaper {
   id: string;

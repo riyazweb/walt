@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { storage, db, auth } from '../firebase';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { db, auth } from '../firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, doc, increment } from 'firebase/firestore';
 
 interface UploadModalProps {
