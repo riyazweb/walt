@@ -9,11 +9,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // Initialize Storage
 // On Cloud Run, it will automatically use the default service account if keyFilename is not provided
 const storageOptions = {};
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS && process.env.NODE_ENV !== 'production') {
   storageOptions.keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  console.log('Using local credentials from:', process.env.GOOGLE_APPLICATION_CREDENTIALS);
+} else {
+  console.log('Using default Google Cloud credentials');
 }
 const storage = new Storage(storageOptions); 
 const bucketName = 'waltbuck1';
@@ -113,5 +121,8 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Serving static files from: ${distPath}`);
+});

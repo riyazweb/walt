@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+dist
+.git
+.env
+server/.env
+*.json
+!package.json
+!package-lock.json
+!server/package.json
+!server/package-lock.json
+!tsconfig*.json
