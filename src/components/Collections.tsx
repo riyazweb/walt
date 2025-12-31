@@ -5,6 +5,7 @@ import { collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, where
 interface Collection {
   id: string;
   name: string;
+  appId?: string;
   description: string;
   wallpaperCount: number;
   coverImage?: string;
@@ -19,11 +20,14 @@ interface Wallpaper {
   createdAt: any;
 }
 
+const API_KEY = 'wall_brain_secret_key_777'; // Match the one in server/.env
+
 const Collections: React.FC = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newName, setNewName] = useState('');
+  const [newAppId, setNewAppId] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
   
@@ -31,6 +35,9 @@ const Collections: React.FC = () => {
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
   const [collectionWallpapers, setCollectionWallpapers] = useState<Wallpaper[]>([]);
   const [loadingWallpapers, setLoadingWallpapers] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   useEffect(() => {
     if (!db) {
@@ -81,17 +88,20 @@ const Collections: React.FC = () => {
       if (editingCollection) {
         await updateDoc(doc(db, 'collections', editingCollection.id), {
           name: newName,
+          appId: newAppId,
           description: newDescription,
         });
       } else {
         await addDoc(collection(db, 'collections'), {
           name: newName,
+          appId: newAppId,
           description: newDescription,
           wallpaperCount: 0,
           createdAt: new Date(),
         });
       }
       setNewName('');
+      setNewAppId('');
       setNewDescription('');
       setEditingCollection(null);
       setIsModalOpen(false);
@@ -112,8 +122,58 @@ const Collections: React.FC = () => {
   const openEditModal = (coll: Collection) => {
     setEditingCollection(coll);
     setNewName(coll.name);
+    setNewAppId(coll.appId || '');
     setNewDescription(coll.description || '');
     setIsModalOpen(true);
+  };
+
+  const handleSync = async () => {
+    if (!selectedCollection || collectionWallpapers.length === 0) return;
+    
+    setSyncing(true);
+    try {
+      const response = await fetch('/api/sync', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-api-key': API_KEY
+        },
+        body: JSON.stringify({
+          collectionName: selectedCollection.name,
+          wallpapers: collectionWallpapers.map(w => ({
+            id: w.id,
+            title: w.title,
+            url: w.url,
+            createdAt: w.createdAt
+          }))
+        })
+      });
+      
+      if (response.ok) {
+        alert('Successfully synced to App API!');
+      } else {
+        alert('Sync failed');
+      }
+    } catch (error) {
+      console.error('Sync error:', error);
+      alert('Error syncing to API');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handlePreview = async (url: string) => {
+    try {
+      const response = await fetch(url, {
+        headers: { 'x-api-key': API_KEY }
+      });
+      const data = await response.json();
+      setPreviewData(data);
+      setIsPreviewOpen(true);
+    } catch (error) {
+      console.error('Preview error:', error);
+      alert('Error fetching preview');
+    }
   };
 
   return (
@@ -133,6 +193,14 @@ const Collections: React.FC = () => {
                 <h1 className="text-2xl font-bold text-slate-900">{selectedCollection.name}</h1>
                 <p className="text-sm text-slate-500">{collectionWallpapers.length} wallpapers in this collection</p>
               </div>
+              <button 
+                onClick={handleSync}
+                disabled={syncing || collectionWallpapers.length === 0}
+                className="ml-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-sm">{syncing ? 'sync' : 'cloud_sync'}</span>
+                {syncing ? 'Syncing...' : 'Sync to App API'}
+              </button>
             </div>
 
             {loadingWallpapers ? (
@@ -178,11 +246,39 @@ const Collections: React.FC = () => {
               <div>
                 <h1 className="text-2xl font-bold" style={{ color: '#1e293b' }}>Collections</h1>
                 <p className="text-sm mt-1" style={{ color: '#64748b' }}>Group wallpapers into themed collections</p>
+                <div className="mt-2 flex items-center gap-2 text-[11px] font-mono bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg border border-blue-100 w-fit">
+                  <span className="material-symbols-outlined text-sm">api</span>
+                  <span>Global API: /api/collections</span>
+                  <div className="flex items-center gap-2 ml-2">
+                    <button 
+                      onClick={() => {
+                        const url = `${window.location.origin}/api/collections`;
+                        navigator.clipboard.writeText(url);
+                        alert("Global API URL Copied!");
+                      }}
+                      className="hover:text-blue-800 flex items-center"
+                      title="Copy URL"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">content_copy</span>
+                    </button>
+                    <button 
+                      onClick={() => handlePreview('/api/collections')}
+                      className="hover:text-blue-800 flex items-center"
+                      title="Preview JSON"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">visibility</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-1 text-[10px] text-slate-400 font-mono">
+                  API Key: {API_KEY} (Use in 'x-api-key' header for Android)
+                </div>
               </div>
               <button 
                 onClick={() => {
                   setEditingCollection(null);
                   setNewName('');
+                  setNewAppId('');
                   setNewDescription('');
                   setIsModalOpen(true);
                 }}
@@ -238,6 +334,65 @@ const Collections: React.FC = () => {
                         <div>
                           <h3 className="font-bold text-slate-900">{coll.name}</h3>
                           <p className="text-sm text-slate-500 mt-1 line-clamp-2">{coll.description || 'No description'}</p>
+                          
+                          <div className="mt-3 flex flex-col gap-2">
+                            {coll.appId && (
+                              <div className="flex items-center gap-2 text-[10px] font-mono bg-slate-50 p-1.5 rounded border border-slate-100 text-slate-500">
+                                <span className="truncate">App API: ?appId={coll.appId}</span>
+                                <div className="ml-auto flex items-center gap-1.5">
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const url = `${window.location.origin}/api/collections?appId=${coll.appId}`;
+                                      navigator.clipboard.writeText(url);
+                                      alert("App API URL Copied!");
+                                    }}
+                                    className="hover:text-primary"
+                                    title="Copy URL"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">content_copy</span>
+                                  </button>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handlePreview(`/api/collections?appId=${coll.appId}`);
+                                    }}
+                                    className="hover:text-primary"
+                                    title="Preview JSON"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">visibility</span>
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2 text-[10px] font-mono bg-slate-50 p-1.5 rounded border border-slate-100 text-slate-500">
+                              <span className="truncate">Wallpapers API</span>
+                              <div className="ml-auto flex items-center gap-1.5">
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const url = `${window.location.origin}/api/collections/${encodeURIComponent(coll.name)}/wallpapers`;
+                                    navigator.clipboard.writeText(url);
+                                    alert("Wallpapers API URL Copied!");
+                                  }}
+                                  className="hover:text-primary"
+                                  title="Copy URL"
+                                >
+                                  <span className="material-symbols-outlined text-sm">content_copy</span>
+                                </button>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePreview(`/api/collections/${encodeURIComponent(coll.name)}/wallpapers`);
+                                  }}
+                                  className="hover:text-primary"
+                                  title="Preview JSON"
+                                >
+                                  <span className="material-symbols-outlined text-sm">visibility</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button 
@@ -297,6 +452,17 @@ const Collections: React.FC = () => {
               </div>
 
               <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">App ID (for API filtering)</label>
+                <input
+                  type="text"
+                  value={newAppId}
+                  onChange={(e) => setNewAppId(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  placeholder="e.g. nature_app_01"
+                />
+              </div>
+
+              <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Description</label>
                 <textarea
                   value={newDescription}
@@ -316,6 +482,41 @@ const Collections: React.FC = () => {
                 <span>{editingCollection ? 'Save Changes' : 'Create Collection'}</span>
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Preview JSON Modal */}
+      {isPreviewOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsPreviewOpen(false)} />
+          <div className="relative bg-white border border-slate-200 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary">visibility</span>
+                <h3 className="text-xl font-bold text-slate-900">JSON Preview</h3>
+              </div>
+              <button onClick={() => setIsPreviewOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto bg-slate-900">
+              <pre className="text-green-400 font-mono text-xs leading-relaxed">
+                {JSON.stringify(previewData, null, 2)}
+              </pre>
+            </div>
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(JSON.stringify(previewData, null, 2));
+                  alert("JSON Copied!");
+                }}
+                className="bg-primary text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-blue-700 transition-all cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-sm">content_copy</span>
+                Copy JSON
+              </button>
+            </div>
           </div>
         </div>
       )}

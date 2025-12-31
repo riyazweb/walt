@@ -1,15 +1,44 @@
+const fs = require('fs');
 const { Storage } = require('@google-cloud/storage');
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
+const rateLimit = require('express-rate-limit'); // Add this
 require('dotenv').config();
 
 console.log('Starting server initialization...');
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+
+// Rate Limiting: Prevent bot attacks and cost spikes
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: { error: 'Too many requests, please try again later.' }
+});
+
+// Apply limiter to all API routes
+app.use('/api/', limiter);
+
+// API Key Middleware: 100% Safe (Header Only)
+const apiKeyAuth = (req, res, next) => {
+  const providedKey = req.headers['x-api-key'];
+  const secretKey = process.env.WALLPAPER_API_KEY;
+
+  if (!providedKey || providedKey !== secretKey) {
+    return res.status(401).json({ error: 'Unauthorized: x-api-key header required' });
+  }
+  next();
+};
+
+// Ensure data directory exists for local JSON storage
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir);
+}
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -124,6 +153,84 @@ app.post('/api/delete', async (req, res) => {
   } catch (err) {
     console.error("Delete error:", err);
     res.status(500).send({ message: err.message });
+  }
+});
+
+// GET all collections (Directly from GCS Bucket folders)
+app.get('/api/collections', apiKeyAuth, async (req, res) => {
+  try {
+    // In GCS, "folders" are just prefixes. We use a delimiter to get them.
+    const [files, query, apiResponse] = await bucket.getFiles({
+      delimiter: '/',
+      autoPaginate: false
+    });
+
+    // apiResponse.prefixes contains the "folder" names
+    const folders = apiResponse.prefixes || [];
+    
+    const collections = folders.map(folder => ({
+      id: folder.replace('/', ''),
+      name: folder.replace('/', ''),
+      storagePath: folder
+    }));
+
+    res.json(collections);
+  } catch (err) {
+    console.error("Error fetching collections from GCS:", err);
+    res.status(500).send(err.message);
+  }
+});
+
+// GET wallpapers for a specific collection (Directly from GCS Bucket)
+app.get('/api/collections/:collectionName/wallpapers', apiKeyAuth, async (req, res) => {
+  try {
+    const { collectionName } = req.params;
+    
+    // Check if we have a locally synced JSON first (to avoid GCS calls)
+    const localPath = path.join(dataDir, `${collectionName}.json`);
+    if (fs.existsSync(localPath)) {
+      const data = fs.readFileSync(localPath, 'utf8');
+      return res.json(JSON.parse(data));
+    }
+
+    // Fallback to GCS if no local sync exists
+    const [files] = await bucket.getFiles({
+      prefix: `${collectionName}/`
+    });
+
+    const wallpapers = files
+      .filter(file => !file.name.endsWith('/')) // Exclude the folder itself if it exists
+      .map(file => ({
+        name: file.name.split('/').pop(), // Just the filename
+        url: `https://storage.googleapis.com/${bucketName}/${file.name}`,
+        fullPath: file.name,
+        contentType: file.metadata.contentType,
+        updated: file.metadata.updated
+      }));
+
+    res.json(wallpapers);
+  } catch (err) {
+    console.error("Error fetching wallpapers from GCS:", err);
+    res.status(500).send(err.message);
+  }
+});
+
+// NEW: Sync endpoint to save JSON from dashboard
+app.post('/api/sync', apiKeyAuth, (req, res) => {
+  try {
+    const { collectionName, wallpapers } = req.body;
+    if (!collectionName || !wallpapers) {
+      return res.status(400).send('Missing collectionName or wallpapers');
+    }
+
+    const localPath = path.join(dataDir, `${collectionName}.json`);
+    fs.writeFileSync(localPath, JSON.stringify(wallpapers, null, 2));
+    
+    console.log(`Synced collection: ${collectionName}`);
+    res.status(200).json({ message: 'Synced successfully', url: `/api/collections/${collectionName}/wallpapers` });
+  } catch (err) {
+    console.error("Sync error:", err);
+    res.status(500).send(err.message);
   }
 });
 
