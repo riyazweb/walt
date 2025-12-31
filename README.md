@@ -1,36 +1,79 @@
-# WALT Wallpapers Dashboard
+# WallBrain Admin Dashboard
 
-A simple and elegant web application to upload and manage wallpapers using React, Vite, Tailwind CSS, and Firebase.
+A sophisticated wallpaper management dashboard built with React, Node.js, and Google Cloud Storage.
 
-## Features
+## 🚀 Features
+- **Google Authentication**: Secure login for admins.
+- **GCS Integration**: Direct image uploads to Google Cloud Storage via a Node.js proxy.
+- **Collection Management**: Organize wallpapers into themed folders/collections.
+- **Cloud Run Ready**: Fully dockerized for easy deployment.
 
-- **Google Authentication**: Secure login using Google ID.
-- **Wallpaper Upload**: Upload images directly to Firebase Storage.
-- **Dashboard**: View and manage your uploaded wallpapers in a beautiful grid layout.
-- **Responsive UI**: Built with Tailwind CSS for a great experience on all devices.
-- **Real-time Updates**: Uses Firebase Firestore for real-time data synchronization.
+---
 
-## Setup Instructions
+## 🛠️ Local Development Setup
 
-1. **Firebase Configuration**:
-   - Create a new project in the [Firebase Console](https://console.firebase.google.com/).
-   - Enable **Authentication** and set up **Google** as a sign-in provider.
-   - Create a **Firestore Database** and a **Storage** bucket.
-   - Copy your Firebase configuration and paste it into [src/firebase.ts](src/firebase.ts).
+### 1. Prerequisites
+- Node.js (v18 or higher)
+- A Google Cloud Project with a Storage Bucket (e.g., `waltbuck1`)
+- A Firebase Project (for Authentication and Firestore)
 
-2. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
+### 2. Environment Configuration
 
-3. **Run the Project**:
-   ```bash
-   npm run dev
-   ```
+#### Backend (`server/.env`)
+Create a `.env` file inside the `server` directory:
+```env
+PORT=5000
+GOOGLE_APPLICATION_CREDENTIALS="../your-service-account-key.json"
+```
 
-## Technologies Used
+#### Frontend (`src/firebase.ts`)
+Ensure your Firebase configuration is correctly set in `src/firebase.ts`.
 
-- **Frontend**: React, Vite, TypeScript
-- **Styling**: Tailwind CSS, Lucide React (Icons)
-- **Backend**: Firebase (Auth, Firestore, Storage)
+### 3. Install Dependencies
+From the **root directory**, run:
+```bash
+# Install frontend dependencies
+npm install
+
+# Install backend dependencies
+cd server
+npm install
+cd ..
+```
+
+### 4. Run Locally
+You can run both the frontend and backend simultaneously using the following command from the **root directory**:
+```bash
+npm run dev:all
+```
+- **Frontend**: [http://localhost:5173](http://localhost:5173)
+- **Backend**: [http://localhost:5000](http://localhost:5000)
+
+---
+
+## ☁️ Deployment to Google Cloud Run
+
+### 1. Push to GitHub
+Ensure your code is pushed to your repository:
+```bash
+git add .
+git commit -m "Ready for deployment"
+git push origin main
+```
+
+### 2. Deploy via Cloud Run Console
+1. Go to [Cloud Run](https://console.cloud.google.com/run).
+2. Click **Create Service**.
+3. Select **Continuously deploy from a repository**.
+4. Choose your GitHub repo and the `main` branch.
+5. Set the **Container Port** to `8080`.
+6. **Crucial**: In the IAM console, grant the `Storage Object Admin` role to the Cloud Run service account so it can upload images to your bucket.
+
+---
+
+## 📁 Project Structure
+- `/src`: React frontend (Vite + Tailwind CSS).
+- `/server`: Node.js/Express backend (GCS Proxy).
+- `Dockerfile`: Multi-stage build for production.
+- `.dockerignore`: Prevents local junk from being uploaded to the cloud.
 

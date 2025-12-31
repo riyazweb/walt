@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 
 interface Stats {
   totalWallpapers: number;
   totalDownloads: number;
   totalCollections: number;
   totalCategories: number;
+}
+
+interface Activity {
+  id: string;
+  action: string;
+  time: string;
+  icon: string;
+  color: string;
+  timestamp: any;
 }
 
 const Analytics: React.FC = () => {
@@ -16,6 +25,7 @@ const Analytics: React.FC = () => {
     totalCollections: 0,
     totalCategories: 0,
   });
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,18 +49,37 @@ const Analytics: React.FC = () => {
       setStats(prev => ({ ...prev, totalCategories: snapshot.size }));
     });
 
+    // Listen to recent activity (wallpapers)
+    const qRecent = query(collection(db, 'wallpapers'), orderBy('createdAt', 'desc'), limit(5));
+    const unsubActivity = onSnapshot(qRecent, (snapshot) => {
+      const recentActivities = snapshot.docs.map(doc => {
+        const data = doc.data();
+        const date = data.createdAt?.toDate() || new Date();
+        return {
+          id: doc.id,
+          action: `New wallpaper "${data.title}" uploaded`,
+          time: date.toLocaleString(),
+          icon: 'cloud_upload',
+          color: 'blue',
+          timestamp: data.createdAt
+        };
+      });
+      setActivities(recentActivities);
+    });
+
     setLoading(false);
 
     return () => {
       unsubWallpapers();
       unsubCollections();
       unsubCategories();
+      unsubActivity();
     };
   }, []);
 
   const analyticsCards = [
-    { label: 'Total Wallpapers', value: stats.totalWallpapers, icon: 'image', color: 'blue', change: '+12 this week' },
-    { label: 'Total Downloads', value: '45.2k', icon: 'download', color: 'green', change: '+8.5% vs last month' },
+    { label: 'Total Wallpapers', value: stats.totalWallpapers, icon: 'image', color: 'blue', change: 'Updated just now' },
+    { label: 'Total Downloads', value: 0, icon: 'download', color: 'green', change: '0% vs last month' },
     { label: 'Active Collections', value: stats.totalCollections, icon: 'folder_open', color: 'purple', change: `${stats.totalCollections} total` },
     { label: 'Categories', value: stats.totalCategories, icon: 'category', color: 'orange', change: `${stats.totalCategories} total` },
   ];
@@ -125,22 +154,23 @@ const Analytics: React.FC = () => {
             <div className="bg-white p-6 rounded-xl border border-slate-200">
               <h3 className="font-bold text-slate-900 mb-4">Recent Activity</h3>
               <div className="space-y-4">
-                {[
-                  { action: 'New wallpaper uploaded', time: '2 minutes ago', icon: 'cloud_upload', color: 'blue' },
-                  { action: 'Collection "Minimal" created', time: '1 hour ago', icon: 'create_new_folder', color: 'purple' },
-                  { action: 'Category "Nature" added', time: '3 hours ago', icon: 'category', color: 'green' },
-                  { action: 'Wallpaper downloaded 50 times', time: '5 hours ago', icon: 'download', color: 'orange' },
-                ].map((activity, index) => (
-                  <div key={index} className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg">
-                    <div className={`p-2 rounded-lg ${colorClasses[activity.color]}`}>
-                      <span className="material-symbols-outlined text-lg">{activity.icon}</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-900">{activity.action}</p>
-                      <p className="text-xs text-slate-500">{activity.time}</p>
-                    </div>
+                {activities.length === 0 ? (
+                  <div className="text-center py-10 text-slate-400">
+                    <p className="text-sm">No recent activity to show</p>
                   </div>
-                ))}
+                ) : (
+                  activities.map((activity) => (
+                    <div key={activity.id} className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg">
+                      <div className={`p-2 rounded-lg ${colorClasses[activity.color]}`}>
+                        <span className="material-symbols-outlined text-lg">{activity.icon}</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-900">{activity.action}</p>
+                        <p className="text-xs text-slate-500">{activity.time}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </>

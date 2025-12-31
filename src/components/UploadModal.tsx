@@ -12,7 +12,9 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [collectionName, setCollectionName] = useState('');
+  const [categoryName, setCategoryName] = useState('');
   const [existingCollections, setExistingCollections] = useState<string[]>([]);
+  const [existingCategories, setExistingCategories] = useState<string[]>([]);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -21,17 +23,26 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
 
   React.useEffect(() => {
     if (isOpen) {
-      const fetchCollections = async () => {
-        const querySnapshot = await getDocs(collection(db, 'collections'));
-        const names = querySnapshot.docs.map(doc => doc.data().name);
-        setExistingCollections(names);
-        if (names.length > 0) {
-          setCollectionName(names[0]);
+      const fetchData = async () => {
+        // Fetch Collections
+        const collSnapshot = await getDocs(collection(db, 'collections'));
+        const collNames = collSnapshot.docs.map(doc => doc.data().name);
+        setExistingCollections(collNames);
+        if (collNames.length > 0) {
+          setCollectionName(collNames[0]);
         } else {
           setIsCreatingNew(true);
         }
+
+        // Fetch Categories
+        const catSnapshot = await getDocs(collection(db, 'categories'));
+        const catNames = catSnapshot.docs.map(doc => doc.data().name);
+        setExistingCategories(catNames);
+        if (catNames.length > 0) {
+          setCategoryName(catNames[0]);
+        }
       };
-      fetchCollections();
+      fetchData();
     }
   }, [isOpen]);
 
@@ -70,8 +81,10 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
       await addDoc(collection(db, 'wallpapers'), {
         title,
         collectionName: collectionName || 'Uncategorized',
+        categoryName: categoryName || 'Uncategorized',
         url: data.url,
         fileName: data.name,
+        fileSize: file.size,
         userId: auth.currentUser?.uid,
         userName: auth.currentUser?.displayName,
         createdAt: serverTimestamp(),
@@ -80,11 +93,10 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
       // 2. Update or Create Collection
       const collName = collectionName || 'Uncategorized';
       const collectionsRef = collection(db, 'collections');
-      const q = query(collectionsRef, where('name', '==', collName));
-      const querySnapshot = await getDocs(q);
+      const qColl = query(collectionsRef, where('name', '==', collName));
+      const collSnapshot = await getDocs(qColl);
 
-      if (querySnapshot.empty) {
-        // Create new collection
+      if (collSnapshot.empty) {
         await addDoc(collectionsRef, {
           name: collName,
           description: `Wallpapers in ${collName}`,
@@ -93,12 +105,24 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
           createdAt: serverTimestamp(),
         });
       } else {
-        // Update existing collection
-        const collectionDoc = querySnapshot.docs[0];
+        const collectionDoc = collSnapshot.docs[0];
         await updateDoc(doc(db, 'collections', collectionDoc.id), {
           wallpaperCount: increment(1),
-          coverImage: data.url, // Update cover to latest upload
+          coverImage: data.url,
         });
+      }
+
+      // 3. Update Category Count
+      if (categoryName) {
+        const categoriesRef = collection(db, 'categories');
+        const qCat = query(categoriesRef, where('name', '==', categoryName));
+        const catSnapshot = await getDocs(qCat);
+        if (!catSnapshot.empty) {
+          const categoryDoc = catSnapshot.docs[0];
+          await updateDoc(doc(db, 'categories', categoryDoc.id), {
+            wallpaperCount: increment(1)
+          });
+        }
       }
 
       setUploading(false);
@@ -214,6 +238,20 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
                       ))}
                     </select>
                   )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Category</label>
+                  <select
+                    value={categoryName}
+                    onChange={(e) => setCategoryName(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  >
+                    <option value="">Select a category</option>
+                    {existingCategories.map(name => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 

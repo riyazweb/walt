@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { PageType } from '../App';
+import { db } from '../firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 interface SidebarProps {
   onUploadClick: () => void;
@@ -14,6 +16,30 @@ interface NavItem {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onUploadClick, currentPage, onNavigate }) => {
+  const [totalStorage, setTotalStorage] = useState(0);
+  const STORAGE_LIMIT_GB = 5;
+  const STORAGE_LIMIT_BYTES = STORAGE_LIMIT_GB * 1024 * 1024 * 1024;
+
+  useEffect(() => {
+    if (!db) return;
+
+    const unsubscribe = onSnapshot(collection(db, 'wallpapers'), (snapshot) => {
+      const storage = snapshot.docs.reduce((acc, doc) => acc + (doc.data().fileSize || 0), 0);
+      setTotalStorage(storage);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const formatStorage = (bytes: number) => {
+    if (bytes === 0) return '0 MB';
+    const mb = bytes / (1024 * 1024);
+    if (mb < 1024) return `${mb.toFixed(1)} MB`;
+    return `${(mb / 1024).toFixed(1)} GB`;
+  };
+
+  const storagePercentage = Math.min((totalStorage / STORAGE_LIMIT_BYTES) * 100, 100);
+
   const mainNavItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
     { id: 'upload', label: 'Upload Wallpapers', icon: 'cloud_upload' },
@@ -93,9 +119,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onUploadClick, currentPage, onNavigat
             <span className="text-xs font-bold uppercase tracking-wider">Storage</span>
           </div>
           <div className="w-full bg-blue-200 rounded-full h-1.5">
-            <div className="bg-primary h-1.5 rounded-full" style={{ width: '42%' }}></div>
+            <div 
+              className="bg-primary h-1.5 rounded-full transition-all duration-500" 
+              style={{ width: `${storagePercentage}%` }}
+            ></div>
           </div>
-          <p className="text-xs text-slate-500 font-medium">4.2 GB used of 10 GB</p>
+          <p className="text-xs text-slate-500 font-medium">
+            {formatStorage(totalStorage)} used of {STORAGE_LIMIT_GB} GB
+          </p>
         </div>
       </div>
     </aside>

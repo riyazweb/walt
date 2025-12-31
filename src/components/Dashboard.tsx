@@ -18,6 +18,8 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ onUploadClick, onNavigate }) => {
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
+  const [collectionCount, setCollectionCount] = useState(0);
+  const [totalStorage, setTotalStorage] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,24 +31,43 @@ const Dashboard: React.FC<DashboardProps> = ({ onUploadClick, onNavigate }) => {
     
     try {
       const q = query(collection(db, 'wallpapers'), orderBy('createdAt', 'desc'));
-      const unsubscribe = onSnapshot(q, (snapshot) => {
+      const unsubscribeWallpapers = onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as Wallpaper[];
         setWallpapers(data);
+        
+        // Calculate total storage
+        const storage = data.reduce((acc, wp: any) => acc + (wp.fileSize || 0), 0);
+        setTotalStorage(storage);
+        
         setLoading(false);
       }, (error) => {
         console.error("Firestore snapshot error:", error);
         setLoading(false);
       });
 
-      return () => unsubscribe();
+      const unsubscribeCollections = onSnapshot(collection(db, 'collections'), (snapshot) => {
+        setCollectionCount(snapshot.size);
+      });
+
+      return () => {
+        unsubscribeWallpapers();
+        unsubscribeCollections();
+      };
     } catch (error) {
       console.error("Error setting up Firestore listener:", error);
       setLoading(false);
     }
   }, []);
+
+  const formatStorage = (bytes: number) => {
+    if (bytes === 0) return '0 MB';
+    const mb = bytes / (1024 * 1024);
+    if (mb < 1024) return `${mb.toFixed(1)} MB`;
+    return `${(mb / 1024).toFixed(1)} GB`;
+  };
 
 
   return (
@@ -74,15 +95,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onUploadClick, onNavigate }) => {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium mb-1">Total Downloads</p>
-                <h3 className="text-3xl font-bold text-black">45.2k</h3>
+                <h3 className="text-3xl font-bold text-black">0</h3>
               </div>
               <div className="p-3 bg-green-50 text-green-600 rounded-lg">
                 <span className="material-symbols-outlined">download</span>
               </div>
             </div>
-            <div className="flex items-center gap-1 text-xs text-green-600 font-medium">
-              <span className="material-symbols-outlined text-sm">trending_up</span>
-              <span>+8.5% vs last month</span>
+            <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
+              <span className="material-symbols-outlined text-sm">trending_flat</span>
+              <span>0% vs last month</span>
             </div>
           </div>
 
@@ -90,14 +111,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onUploadClick, onNavigate }) => {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium mb-1">Active Collections</p>
-                <h3 className="text-3xl font-bold text-black">12</h3>
+                <h3 className="text-3xl font-bold text-black">{collectionCount}</h3>
               </div>
               <div className="p-3 bg-purple-50 text-purple-600 rounded-lg">
                 <span className="material-symbols-outlined">folder_open</span>
               </div>
             </div>
-            <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
-              <span>2 created recently</span>
+            <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
+              <span>{collectionCount} total collections</span>
             </div>
           </div>
 
@@ -105,14 +126,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onUploadClick, onNavigate }) => {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium mb-1">Storage Used</p>
-                <h3 className="text-3xl font-bold text-black">4.2<span className="text-lg text-gray-600 font-normal ml-1">GB</span></h3>
+                <h3 className="text-3xl font-bold text-black">{formatStorage(totalStorage)}</h3>
               </div>
               <div className="p-3 bg-orange-50 text-orange-600 rounded-lg">
                 <span className="material-symbols-outlined">database</span>
               </div>
             </div>
-            <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
-              <span>Of 10GB Total Capacity</span>
+            <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
+              <span>Of 5GB Total Capacity</span>
             </div>
           </div>
         </section>

@@ -8,6 +8,7 @@ interface Wallpaper {
   url: string;
   userName: string;
   collectionName?: string;
+  categoryName?: string;
   fileName?: string;
   createdAt: any;
 }
@@ -178,11 +179,18 @@ const AllWallpapers: React.FC<AllWallpapersProps> = ({ onUploadClick }) => {
                   <h4 className="font-semibold text-slate-900 text-sm truncate">{wp.title}</h4>
                   <div className="flex items-center justify-between mt-1">
                     <p className="text-xs text-slate-500">by {wp.userName}</p>
-                    {wp.collectionName && (
-                      <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">
-                        {wp.collectionName}
-                      </span>
-                    )}
+                    <div className="flex gap-1">
+                      {wp.categoryName && (
+                        <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-medium">
+                          {wp.categoryName}
+                        </span>
+                      )}
+                      {wp.collectionName && (
+                        <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">
+                          {wp.collectionName}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
