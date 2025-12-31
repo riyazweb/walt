@@ -10,7 +10,10 @@ require('dotenv').config();
 console.log('Starting server initialization...');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: '*', // Allow all origins
+  allowedHeaders: ['Content-Type', 'x-api-key'] // Explicitly allow your custom header
+}));
 app.use(express.json({ limit: '10mb' }));
 
 // Rate Limiting: Prevent bot attacks and cost spikes
@@ -25,11 +28,25 @@ app.use('/api/', limiter);
 
 // API Key Middleware: 100% Safe (Header Only)
 const apiKeyAuth = (req, res, next) => {
+  // Express lowercases all headers, so we check for 'x-api-key'
   const providedKey = req.headers['x-api-key'];
   const secretKey = process.env.WALLPAPER_API_KEY;
 
-  if (!providedKey || providedKey !== secretKey) {
-    return res.status(401).json({ error: 'Unauthorized: x-api-key header required' });
+  // Debug log (visible in Cloud Run logs)
+  if (!providedKey) {
+    console.log('[Auth Failed] Missing x-api-key header');
+    return res.status(401).json({ 
+      error: 'Unauthorized', 
+      message: 'Missing x-api-key header' 
+    });
+  }
+
+  if (providedKey !== secretKey) {
+    console.log(`[Auth Failed] Key Mismatch. Received: ${providedKey.substring(0, 3)}..., Expected: ${secretKey ? secretKey.substring(0, 3) + '...' : 'NOT_SET'}`);
+    return res.status(401).json({ 
+      error: 'Unauthorized', 
+      message: 'Invalid API Key' 
+    });
   }
   next();
 };
@@ -259,6 +276,7 @@ process.on('unhandledRejection', (reason, promise) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`>>> Server is successfully listening on 0.0.0.0:${PORT}`);
   console.log(`>>> NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`>>> API Key Loaded: ${process.env.WALLPAPER_API_KEY ? 'YES (starts with ' + process.env.WALLPAPER_API_KEY.substring(0, 3) + ')' : 'NO'}`);
 }).on('error', (err) => {
   console.error('Server failed to start:', err);
 });

@@ -152,7 +152,8 @@ const Collections: React.FC = () => {
       if (response.ok) {
         alert('Successfully synced to App API!');
       } else {
-        alert('Sync failed');
+        const errorData = await response.json();
+        alert(`Sync failed: ${errorData.message || errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Sync error:', error);
@@ -168,11 +169,17 @@ const Collections: React.FC = () => {
         headers: { 'x-api-key': API_KEY }
       });
       const data = await response.json();
+      
+      if (!response.ok) {
+        alert(`Error: ${data.message || data.error || 'Unauthorized'}`);
+        return;
+      }
+      
       setPreviewData(data);
       setIsPreviewOpen(true);
     } catch (error) {
       console.error('Preview error:', error);
-      alert('Error fetching preview');
+      alert('Error fetching preview. Check console for details.');
     }
   };
 
