@@ -276,6 +276,7 @@ process.on('unhandledRejection', (reason, promise) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`>>> Server is successfully listening on 0.0.0.0:${PORT}`);
   console.log(`>>> NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`>>> Available Env Vars: ${Object.keys(process.env).join(', ')}`);
   console.log(`>>> API Key Loaded: ${process.env.WALLPAPER_API_KEY ? 'YES (starts with ' + process.env.WALLPAPER_API_KEY.substring(0, 3) + ')' : 'NO'}`);
 }).on('error', (err) => {
   console.error('Server failed to start:', err);
