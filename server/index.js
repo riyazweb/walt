@@ -4,8 +4,12 @@ const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
-const rateLimit = require('express-rate-limit'); // Add this
-require('dotenv').config();
+const rateLimit = require('express-rate-limit');
+
+// Only load dotenv in development
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 console.log('Starting server initialization...');
 
@@ -25,6 +29,12 @@ const limiter = rateLimit({
 
 // Apply limiter to all API routes
 app.use('/api/', limiter);
+
+// Request Logger for API
+app.use('/api/', (req, res, next) => {
+  console.log(`[API Request] ${req.method} ${req.url}`);
+  next();
+});
 
 // API Key Middleware: 100% Safe (Header Only)
 const apiKeyAuth = (req, res, next) => {
@@ -92,10 +102,7 @@ const upload = multer({
   },
 });
 
-// Serve static files from the React app
-const distPath = path.join(__dirname, '../dist');
-console.log(`Checking for static files at: ${distPath}`);
-app.use(express.static(distPath));
+// --- API ROUTES ---
 
 // GET all wallpapers
 app.get('/api/wallpapers', async (req, res) => {
@@ -121,7 +128,6 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
     }
 
     const collectionName = req.body.collectionName || 'Uncategorized';
-    // Create a folder-like structure using the collection name as a prefix
     const fileName = `${collectionName}/${Date.now()}-${req.file.originalname}`;
     const blob = bucket.file(fileName);
     
@@ -140,9 +146,7 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
     });
 
     blobStream.on('finish', async () => {
-      // The public URL can be used to directly access the file via HTTP.
       const publicUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`;
-      
       res.status(200).send({
         message: 'Uploaded successfully',
         name: blob.name,
@@ -173,18 +177,15 @@ app.post('/api/delete', async (req, res) => {
   }
 });
 
-// GET all collections (Directly from GCS Bucket folders)
+// GET all collections
 app.get('/api/collections', apiKeyAuth, async (req, res) => {
   try {
-    // In GCS, "folders" are just prefixes. We use a delimiter to get them.
     const [files, query, apiResponse] = await bucket.getFiles({
       delimiter: '/',
       autoPaginate: false
     });
 
-    // apiResponse.prefixes contains the "folder" names
     const folders = apiResponse.prefixes || [];
-    
     const collections = folders.map(folder => ({
       id: folder.replace('/', ''),
       name: folder.replace('/', ''),
@@ -198,27 +199,25 @@ app.get('/api/collections', apiKeyAuth, async (req, res) => {
   }
 });
 
-// GET wallpapers for a specific collection (Directly from GCS Bucket)
+// GET wallpapers for a specific collection
 app.get('/api/collections/:collectionName/wallpapers', apiKeyAuth, async (req, res) => {
   try {
     const { collectionName } = req.params;
-    
-    // Check if we have a locally synced JSON first (to avoid GCS calls)
     const localPath = path.join(dataDir, `${collectionName}.json`);
+    
     if (fs.existsSync(localPath)) {
       const data = fs.readFileSync(localPath, 'utf8');
       return res.json(JSON.parse(data));
     }
 
-    // Fallback to GCS if no local sync exists
     const [files] = await bucket.getFiles({
       prefix: `${collectionName}/`
     });
 
     const wallpapers = files
-      .filter(file => !file.name.endsWith('/')) // Exclude the folder itself if it exists
+      .filter(file => !file.name.endsWith('/'))
       .map(file => ({
-        name: file.name.split('/').pop(), // Just the filename
+        name: file.name.split('/').pop(),
         url: `https://storage.googleapis.com/${bucketName}/${file.name}`,
         fullPath: file.name,
         contentType: file.metadata.contentType,
@@ -232,7 +231,7 @@ app.get('/api/collections/:collectionName/wallpapers', apiKeyAuth, async (req, r
   }
 });
 
-// NEW: Sync endpoint to save JSON from dashboard
+// Sync endpoint
 app.post('/api/sync', apiKeyAuth, (req, res) => {
   try {
     const { collectionName, wallpapers } = req.body;
@@ -251,33 +250,29 @@ app.post('/api/sync', apiKeyAuth, (req, res) => {
   }
 });
 
-// The "catchall" handler: for any request that doesn't
-// match one above, send back React's index.html file.
+// --- STATIC FILES & CATCHALL ---
+
+const distPath = path.join(__dirname, '../dist');
+app.use(express.static(distPath));
+
 app.get('*', (req, res) => {
   const indexPath = path.join(distPath, 'index.html');
   res.sendFile(indexPath, (err) => {
     if (err) {
-      console.error('Error sending index.html:', err);
-      res.status(500).send('Frontend build not found. Please ensure the build step completed successfully.');
+      res.status(500).send('Frontend build not found.');
     }
   });
 });
 
 const PORT = process.env.PORT || 8080;
 
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-});
-
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`>>> Server is successfully listening on 0.0.0.0:${PORT}`);
   console.log(`>>> NODE_ENV: ${process.env.NODE_ENV}`);
-  console.log(`>>> Available Env Vars: ${Object.keys(process.env).join(', ')}`);
-  console.log(`>>> API Key Loaded: ${process.env.WALLPAPER_API_KEY ? 'YES (starts with ' + process.env.WALLPAPER_API_KEY.substring(0, 3) + ')' : 'NO'}`);
-}).on('error', (err) => {
-  console.error('Server failed to start:', err);
+  
+  const debugVars = Object.keys(process.env).filter(k => k.startsWith('WALL') || k.startsWith('GOOGLE'));
+  console.log(`>>> Debug Env Vars Found: ${debugVars.join(', ') || 'NONE'}`);
+  
+  const key = process.env.WALLPAPER_API_KEY;
+  console.log(`>>> API Key Status: ${key ? 'LOADED (starts with ' + key.substring(0, 3) + ')' : 'NOT FOUND IN process.env'}`);
 });

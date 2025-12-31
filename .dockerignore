@@ -4,7 +4,9 @@ dist
 .git
 .env
 server/.env
-*.json
+server/data/*.json
+# Don't ignore all JSON files, just specific ones if needed
+# *.json 
 !package.json
 !package-lock.json
 !server/package.json
