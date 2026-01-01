@@ -61,24 +61,24 @@ const Settings: React.FC = () => {
   ];
 
   return (
-    <div className="flex-1 overflow-y-auto p-8">
-      <div className="max-w-[800px] mx-auto flex flex-col gap-8">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+      <div className="max-w-[800px] mx-auto flex flex-col gap-4 md:gap-6 lg:gap-8">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-          <p className="text-slate-500 text-sm mt-1">Manage your app preferences and configurations</p>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900">Settings</h1>
+          <p className="text-slate-500 text-xs md:text-sm mt-1">Manage your app preferences and configurations</p>
         </div>
 
         {/* Settings Sections */}
         {sections.map((section, sIndex) => (
           <div key={sIndex} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="p-5 border-b border-slate-100">
-              <h3 className="font-bold text-slate-900">{section.title}</h3>
-              <p className="text-sm text-slate-500 mt-0.5">{section.description}</p>
+            <div className="p-4 md:p-5 border-b border-slate-100">
+              <h3 className="font-bold text-base md:text-lg text-slate-900">{section.title}</h3>
+              <p className="text-xs md:text-sm text-slate-500 mt-0.5">{section.description}</p>
             </div>
             <div className="divide-y divide-slate-100">
               {section.settings.map((setting) => (
-                <div key={setting.id} className="p-5 flex items-center justify-between">
+                <div key={setting.id} className="p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex-1">
                     <p className="font-medium text-slate-900">{setting.label}</p>
                     {setting.description && (

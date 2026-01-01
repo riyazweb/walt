@@ -12,6 +12,7 @@ import Settings from './components/Settings';
 import Support from './components/Support';
 import Login from './components/Login';
 import UploadModal from './components/UploadModal';
+import MobileNav from './components/MobileNav';
 import './App.css';
 
 export type PageType = 'dashboard' | 'upload' | 'wallpapers' | 'categories' | 'collections' | 'analytics' | 'settings' | 'support';
@@ -78,15 +79,26 @@ function App() {
 
   return (
     <div className="flex h-screen w-full font-display bg-background-light text-slate-900 overflow-hidden">
-      <Sidebar 
-        onUploadClick={() => setIsUploadModalOpen(true)} 
+      {/* Mobile: Hidden sidebar, toggle with hamburger menu */}
+      <div className="hidden md:block">
+        <Sidebar 
+          onUploadClick={() => setIsUploadModalOpen(true)} 
+          currentPage={currentPage}
+          onNavigate={handleNavigate}
+        />
+      </div>
+      <main className="flex-1 flex flex-col h-full overflow-hidden bg-background-light relative w-full">
+        <Header user={user} currentPage={currentPage} />
+        <div className="flex-1 overflow-y-auto pb-16 md:pb-0">
+          {renderPage()}
+        </div>
+      </main>
+      {/* Mobile bottom navigation */}
+      <MobileNav 
         currentPage={currentPage}
         onNavigate={handleNavigate}
+        onUploadClick={() => setIsUploadModalOpen(true)}
       />
-      <main className="flex-1 flex flex-col h-full overflow-hidden bg-background-light relative">
-        <Header user={user} currentPage={currentPage} />
-        {renderPage()}
-      </main>
       <UploadModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} />
     </div>
   );

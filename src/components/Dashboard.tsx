@@ -71,18 +71,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onUploadClick, onNavigate }) => {
 
 
   return (
-    <div className="flex-1 overflow-y-auto p-8">
-      <div className="max-w-[1200px] mx-auto flex flex-col gap-8">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+      <div className="max-w-[1200px] mx-auto flex flex-col gap-4 md:gap-6 lg:gap-8">
         {/* Stats Row */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between gap-4 transition-transform hover:-translate-y-1 duration-300">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
+          <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between gap-3 md:gap-4 transition-transform hover:-translate-y-1 duration-300">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium mb-1">Total Wallpapers</p>
-                <h3 className="text-3xl font-bold text-black">{wallpapers.length}</h3>
+                <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Total Wallpapers</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-black">{wallpapers.length}</h3>
               </div>
-              <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
-                <span className="material-symbols-outlined">image</span>
+              <div className="p-2 md:p-3 bg-blue-50 text-blue-600 rounded-lg">
+                <span className="material-symbols-outlined text-xl md:text-2xl">image</span>
               </div>
             </div>
             <div className="flex items-center gap-1 text-xs text-green-600 font-medium">
@@ -91,14 +91,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onUploadClick, onNavigate }) => {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between gap-4 transition-transform hover:-translate-y-1 duration-300">
+          <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between gap-3 md:gap-4 transition-transform hover:-translate-y-1 duration-300">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium mb-1">Total Downloads</p>
-                <h3 className="text-3xl font-bold text-black">0</h3>
+                <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Total Downloads</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-black">0</h3>
               </div>
-              <div className="p-3 bg-green-50 text-green-600 rounded-lg">
-                <span className="material-symbols-outlined">download</span>
+              <div className="p-2 md:p-3 bg-green-50 text-green-600 rounded-lg">
+                <span className="material-symbols-outlined text-xl md:text-2xl">download</span>
               </div>
             </div>
             <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
@@ -107,14 +107,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onUploadClick, onNavigate }) => {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between gap-4 transition-transform hover:-translate-y-1 duration-300">
+          <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between gap-3 md:gap-4 transition-transform hover:-translate-y-1 duration-300">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium mb-1">Active Collections</p>
-                <h3 className="text-3xl font-bold text-black">{collectionCount}</h3>
+                <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Active Collections</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-black">{collectionCount}</h3>
               </div>
-              <div className="p-3 bg-purple-50 text-purple-600 rounded-lg">
-                <span className="material-symbols-outlined">folder_open</span>
+              <div className="p-2 md:p-3 bg-purple-50 text-purple-600 rounded-lg">
+                <span className="material-symbols-outlined text-xl md:text-2xl">folder_open</span>
               </div>
             </div>
             <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
@@ -122,14 +122,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onUploadClick, onNavigate }) => {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between gap-4 transition-transform hover:-translate-y-1 duration-300">
+          <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between gap-3 md:gap-4 transition-transform hover:-translate-y-1 duration-300">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium mb-1">Storage Used</p>
-                <h3 className="text-3xl font-bold text-black">{formatStorage(totalStorage)}</h3>
+                <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Storage Used</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-black">{formatStorage(totalStorage)}</h3>
               </div>
-              <div className="p-3 bg-orange-50 text-orange-600 rounded-lg">
-                <span className="material-symbols-outlined">database</span>
+              <div className="p-2 md:p-3 bg-orange-50 text-orange-600 rounded-lg">
+                <span className="material-symbols-outlined text-xl md:text-2xl">database</span>
               </div>
             </div>
             <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
@@ -140,42 +140,42 @@ const Dashboard: React.FC<DashboardProps> = ({ onUploadClick, onNavigate }) => {
 
         {/* Quick Actions */}
         <section>
-          <h3 className="text-lg font-bold mb-4" style={{ color: '#1e293b' }}>Quick Actions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <h3 className="text-base md:text-lg font-bold mb-3 md:mb-4" style={{ color: '#1e293b' }}>Quick Actions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
             <button 
               onClick={onUploadClick}
-              className="bg-white hover:bg-primary border border-slate-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-4 group cursor-pointer hover:border-primary"
+              className="bg-white hover:bg-primary border border-slate-200 p-4 md:p-6 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-3 md:gap-4 group cursor-pointer hover:border-primary"
             >
               <div className="bg-slate-100 group-hover:bg-white/20 rounded-full p-2 group-hover:scale-110 transition-transform">
-                <span className="material-symbols-outlined text-2xl group-hover:text-white-force" style={{ color: '#1e293b' }}>cloud_upload</span>
+                <span className="material-symbols-outlined text-xl md:text-2xl group-hover:text-white-force" style={{ color: '#1e293b' }}>cloud_upload</span>
               </div>
               <div className="text-left">
-                <span className="block font-bold text-lg group-hover:text-white-force" style={{ color: '#1e293b' }}>Upload New</span>
-                <span className="block text-sm font-normal group-hover:text-white-force" style={{ color: '#64748b' }}>Add a single wallpaper</span>
+                <span className="block font-bold text-base md:text-lg group-hover:text-white-force" style={{ color: '#1e293b' }}>Upload New</span>
+                <span className="block text-xs md:text-sm font-normal group-hover:text-white-force" style={{ color: '#64748b' }}>Add a single wallpaper</span>
               </div>
             </button>
             <button 
               onClick={() => onNavigate('collections')}
-              className="bg-white hover:bg-primary border border-slate-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-4 group cursor-pointer hover:border-primary"
+              className="bg-white hover:bg-primary border border-slate-200 p-4 md:p-6 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-3 md:gap-4 group cursor-pointer hover:border-primary"
             >
               <div className="bg-slate-100 group-hover:bg-white/20 rounded-full p-2 group-hover:scale-110 transition-transform">
-                <span className="material-symbols-outlined text-2xl group-hover:text-white-force" style={{ color: '#1e293b' }}>create_new_folder</span>
+                <span className="material-symbols-outlined text-xl md:text-2xl group-hover:text-white-force" style={{ color: '#1e293b' }}>create_new_folder</span>
               </div>
               <div className="text-left">
-                <span className="block font-bold text-lg group-hover:text-white-force" style={{ color: '#1e293b' }}>Create Collection</span>
-                <span className="block text-sm font-normal group-hover:text-white-force" style={{ color: '#64748b' }}>Group by theme</span>
+                <span className="block font-bold text-base md:text-lg group-hover:text-white-force" style={{ color: '#1e293b' }}>Create Collection</span>
+                <span className="block text-xs md:text-sm font-normal group-hover:text-white-force" style={{ color: '#64748b' }}>Group by theme</span>
               </div>
             </button>
             <button 
               onClick={() => window.open('/', '_blank')}
-              className="bg-white hover:bg-primary border border-slate-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-4 group cursor-pointer hover:border-primary"
+              className="bg-white hover:bg-primary border border-slate-200 p-4 md:p-6 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-3 md:gap-4 group cursor-pointer hover:border-primary"
             >
               <div className="bg-slate-100 group-hover:bg-white/20 rounded-full p-2 group-hover:scale-110 transition-transform">
-                <span className="material-symbols-outlined text-2xl group-hover:text-white-force" style={{ color: '#1e293b' }}>preview</span>
+                <span className="material-symbols-outlined text-xl md:text-2xl group-hover:text-white-force" style={{ color: '#1e293b' }}>preview</span>
               </div>
               <div className="text-left">
-                <span className="block font-bold text-lg group-hover:text-white-force" style={{ color: '#1e293b' }}>App Preview</span>
-                <span className="block text-sm font-normal group-hover:text-white-force" style={{ color: '#64748b' }}>View as user</span>
+                <span className="block font-bold text-base md:text-lg group-hover:text-white-force" style={{ color: '#1e293b' }}>App Preview</span>
+                <span className="block text-xs md:text-sm font-normal group-hover:text-white-force" style={{ color: '#64748b' }}>View as user</span>
               </div>
             </button>
           </div>
@@ -183,10 +183,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onUploadClick, onNavigate }) => {
 
         {/* Recent Uploads */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-black">Recent Uploads</h3>
-            <a className="text-primary text-sm font-semibold hover:underline flex items-center gap-1" href="#">
-              View All <span className="material-symbols-outlined text-sm">arrow_forward</span>
+          <div className="flex items-center justify-between mb-3 md:mb-4">
+            <h3 className="text-base md:text-lg font-bold text-black">Recent Uploads</h3>
+            <a className="text-primary text-xs md:text-sm font-semibold hover:underline flex items-center gap-1" href="#">
+              <span className="hidden sm:inline">View All</span><span className="sm:hidden">All</span> <span className="material-symbols-outlined text-sm">arrow_forward</span>
             </a>
           </div>
           
@@ -199,10 +199,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onUploadClick, onNavigate }) => {
               <p className="text-slate-500 text-lg">No wallpapers found. Start by uploading one!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
               {wallpapers.map((wp) => (
                 <div key={wp.id} className="group cursor-pointer">
-                  <div className="aspect-[2/3] w-full rounded-lg overflow-hidden bg-slate-200 relative mb-3 shadow-sm group-hover:shadow-md transition-all">
+                  <div className="aspect-[2/3] w-full rounded-lg overflow-hidden bg-slate-200 relative mb-2 md:mb-3 shadow-sm group-hover:shadow-md transition-all">
                     <div 
                       className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" 
                       style={{ backgroundImage: `url('${wp.url}')` }}

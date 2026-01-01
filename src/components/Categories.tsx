@@ -89,13 +89,13 @@ const Categories: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-8">
-      <div className="max-w-[1200px] mx-auto flex flex-col gap-6">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+      <div className="max-w-[1200px] mx-auto flex flex-col gap-4 md:gap-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: '#1e293b' }}>Categories / Tags</h1>
-            <p className="text-sm mt-1" style={{ color: '#64748b' }}>Organize wallpapers by categories and tags</p>
+            <h1 className="text-xl md:text-2xl font-bold" style={{ color: '#1e293b' }}>Categories / Tags</h1>
+            <p className="text-xs md:text-sm mt-1" style={{ color: '#64748b' }}>Organize wallpapers by categories and tags</p>
           </div>
           <button 
             onClick={() => {
@@ -104,10 +104,10 @@ const Categories: React.FC = () => {
               setSelectedColor(COLORS[0].value);
               setIsModalOpen(true);
             }}
-            className="bg-primary hover:bg-blue-700 px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 transition-all cursor-pointer"
+            className="bg-primary hover:bg-blue-700 px-4 md:px-5 py-2 md:py-2.5 rounded-lg md:rounded-xl font-semibold flex items-center gap-2 transition-all cursor-pointer text-sm md:text-base w-full sm:w-auto justify-center"
             style={{ color: '#ffffff !important' } as React.CSSProperties}
           >
-            <span className="material-symbols-outlined text-xl">add</span>
+            <span className="material-symbols-outlined text-lg md:text-xl">add</span>
             <span>New Category</span>
           </button>
         </div>
@@ -131,7 +131,7 @@ const Categories: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
             {categories.map((category) => (
               <div 
                 key={category.id} 

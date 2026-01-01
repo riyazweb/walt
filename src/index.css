@@ -4,6 +4,10 @@
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  
+  /* Touch-friendly sizing */
+  --tap-target-size: 44px;
+  --min-interactive-size: 48px;
 }
 
 body {
@@ -12,11 +16,21 @@ body {
   min-height: 100vh;
   background-color: #f6f6f8;
   color: #1e293b;
+  
+  /* Mobile optimizations */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  overflow-x: hidden;
 }
 
 /* Force color inheritance for buttons and all child elements */
 button {
   color: inherit;
+  /* Touch-friendly minimum size */
+  min-width: var(--tap-target-size);
+  min-height: var(--tap-target-size);
 }
 
 button * {
@@ -35,6 +49,55 @@ button * {
     'GRAD' 0,
     'opsz' 24;
   color: inherit;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  :root {
+    font-size: 14px;
+  }
+  
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* Prevent text selection on buttons and interactive elements for better mobile UX */
+button,
+.cursor-pointer,
+[role="button"] {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+/* Smooth scrolling */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Better touch scrolling on iOS */
+.overflow-y-auto,
+.overflow-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix for mobile viewport height */
+@supports (-webkit-touch-callout: none) {
+  body {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Accessible focus styles for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid #2b6cee;
+  outline-offset: 2px;
+}
+
+/* Remove focus outline for mouse users */
+*:focus:not(:focus-visible) {
+  outline: none;
 }
 
 

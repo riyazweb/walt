@@ -144,31 +144,31 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center px-3 md:px-4">
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
-        <div className="p-6 border-b border-slate-200 flex justify-between items-center">
-          <h3 className="text-xl font-bold text-slate-900">Upload Wallpaper</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+      <div className="relative bg-white border border-slate-200 w-full max-w-md rounded-xl md:rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+        <div className="p-4 md:p-6 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white z-10">
+          <h3 className="text-lg md:text-xl font-bold text-slate-900">Upload Wallpaper</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer min-w-10 min-h-10 flex items-center justify-center">
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
 
-        <form onSubmit={handleUpload} className="p-6 space-y-4">
+        <form onSubmit={handleUpload} className="p-4 md:p-6 space-y-3 md:space-y-4">
           {success ? (
-            <div className="py-4 text-center space-y-4">
-              <div className="size-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
-                <span className="material-symbols-outlined text-4xl">check_circle</span>
+            <div className="py-4 md:py-6 text-center space-y-3 md:space-y-4">
+              <div className="size-14 md:size-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+                <span className="material-symbols-outlined text-3xl md:text-4xl">check_circle</span>
               </div>
-              <p className="text-xl font-bold text-slate-900">Upload Successful!</p>
+              <p className="text-lg md:text-xl font-bold text-slate-900">Upload Successful!</p>
               
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left">
+              <div className="bg-slate-50 p-3 md:p-4 rounded-xl border border-slate-200 text-left">
                 <p className="text-xs font-bold text-slate-500 uppercase mb-2">Google Cloud URL</p>
                 <div className="flex items-center gap-2">
                   <input 
                     readOnly 
                     value={uploadedUrl} 
-                    className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-600 focus:outline-none"
+                    className="flex-1 bg-white border border-slate-200 rounded-lg px-2 md:px-3 py-1.5 md:py-2 text-xs text-slate-600 focus:outline-none"
                   />
                   <button 
                     type="button"
@@ -193,7 +193,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
             </div>
           ) : (
             <>
-              <div className="space-y-4">
+              <div className="space-y-3 md:space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Wallpaper Title</label>
                   <input
@@ -201,7 +201,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
                     required
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg md:rounded-xl px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     placeholder="e.g. Neon Tokyo"
                   />
                 </div>

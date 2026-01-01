@@ -84,44 +84,44 @@ const AllWallpapers: React.FC<AllWallpapersProps> = ({ onUploadClick }) => {
   );
 
   return (
-    <div className="flex-1 overflow-y-auto p-8">
-      <div className="max-w-[1400px] mx-auto flex flex-col gap-6">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+      <div className="max-w-[1400px] mx-auto flex flex-col gap-4 md:gap-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: '#1e293b' }}>All Wallpapers</h1>
-            <p className="text-sm mt-1" style={{ color: '#64748b' }}>Manage and organize your wallpaper collection</p>
+            <h1 className="text-xl md:text-2xl font-bold" style={{ color: '#1e293b' }}>All Wallpapers</h1>
+            <p className="text-xs md:text-sm mt-1" style={{ color: '#64748b' }}>Manage and organize your wallpaper collection</p>
           </div>
           <button 
             onClick={onUploadClick}
-            className="bg-primary hover:bg-blue-700 px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 transition-all cursor-pointer"
+            className="bg-primary hover:bg-blue-700 px-4 md:px-5 py-2 md:py-2.5 rounded-lg md:rounded-xl font-semibold flex items-center gap-2 transition-all cursor-pointer text-sm md:text-base w-full sm:w-auto justify-center"
             style={{ color: '#ffffff !important' } as React.CSSProperties}
           >
-            <span className="material-symbols-outlined text-xl">add</span>
+            <span className="material-symbols-outlined text-lg md:text-xl">add</span>
             <span>Upload New</span>
           </button>
         </div>
 
         {/* Search & Filter */}
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-4">
           <div className="flex-1 relative">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+            <span className="material-symbols-outlined absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
             <input
               type="text"
               placeholder="Search wallpapers..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              className="w-full pl-10 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-3 bg-white border border-slate-200 rounded-lg md:rounded-xl text-sm md:text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
           </div>
-          <button className="bg-white border border-slate-200 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2 cursor-pointer">
-            <span className="material-symbols-outlined">filter_list</span>
+          <button className="bg-white border border-slate-200 px-4 py-2.5 md:py-3 rounded-lg md:rounded-xl text-slate-600 hover:bg-slate-50 transition-all flex items-center justify-center gap-2 cursor-pointer text-sm md:text-base">
+            <span className="material-symbols-outlined text-xl">filter_list</span>
             Filter
           </button>
         </div>
 
         {/* Stats */}
-        <div className="flex items-center gap-6 text-sm">
+        <div className="flex flex-wrap items-center gap-3 md:gap-6 text-xs md:text-sm">
           <span className="text-slate-500">Total: <strong className="text-slate-900">{wallpapers.length}</strong> wallpapers</span>
           {searchTerm && (
             <span className="text-slate-500">Showing: <strong className="text-slate-900">{filteredWallpapers.length}</strong> results</span>
@@ -147,7 +147,7 @@ const AllWallpapers: React.FC<AllWallpapersProps> = ({ onUploadClick }) => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-5">
             {filteredWallpapers.map((wp) => (
               <div key={wp.id} className="group bg-white rounded-xl overflow-hidden border border-slate-200 hover:shadow-lg transition-all">
                 <div className="aspect-[2/3] w-full overflow-hidden bg-slate-100 relative">
