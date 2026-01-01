@@ -83,7 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onUploadClick, currentPage, onNavigat
           <span className="material-symbols-outlined text-3xl" style={{ color: '#2b6cee !important' } as React.CSSProperties}>wallpaper</span>
         </div>
         <div>
-          <h1 className="font-bold text-lg tracking-tight" style={{ color: '#1e293b !important' } as React.CSSProperties}>WallBrain</h1>
+          <h1 className="font-bold text-lg tracking-tight" style={{ color: '#1e293b !important' } as React.CSSProperties}>WALTPAPER</h1>
           <p className="text-xs font-medium" style={{ color: '#2b6cee !important' } as React.CSSProperties}>Admin Panel</p>
         </div>
       </div>

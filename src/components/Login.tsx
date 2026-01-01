@@ -19,7 +19,7 @@ const Login: React.FC = () => {
             <span className="material-symbols-outlined text-5xl">wallpaper</span>
           </div>
         </div>
-        <h2 className="text-4xl font-black text-slate-900 mb-3 tracking-tight">WallBrain</h2>
+        <h2 className="text-4xl font-black text-slate-900 mb-3 tracking-tight">WALTPAPER</h2>
         <p className="text-slate-500 mb-10 font-medium leading-relaxed">
           The ultimate wallpaper management dashboard. <br/>
           Sign in to start uploading and organizing.

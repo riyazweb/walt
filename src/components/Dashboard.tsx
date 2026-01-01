@@ -221,7 +221,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onUploadClick, onNavigate }) => {
         </section>
 
         <footer className="mt-8 pt-8 border-t border-slate-200 text-center text-slate-400 text-xs pb-4">
-          <p>© 2024 WallBrain Inc. All rights reserved.</p>
+          <p>© 2024 WALTPAPER Inc. All rights reserved.</p>
         </footer>
       </div>
     </div>

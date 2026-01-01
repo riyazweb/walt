@@ -1,4 +1,4 @@
-# WallBrain Admin Dashboard
+# WALTPAPER Admin Dashboard
 
 A sophisticated wallpaper management dashboard built with React, Node.js, and Google Cloud Storage.
 
